@@ -1,6 +1,14 @@
 close all ; clear all ; clc;
 
 function plot_signal(x, y, n)
+
+    mean_x = mean(x);
+    mean_y = mean(y);
+
+    strMeanX = sprintf('mean(x) = %.4f', mean_x);
+    strMeanY = sprintf('mean(y) = %.4f', mean_y);
+
+
     figure('Name','I/O Signals');
     subplot(3, 1, 1);
     plot(1:1:n, y, 'LineWidth', 1.2, 'DisplayName', 'Output y[n]');
@@ -18,6 +26,7 @@ function plot_signal(x, y, n)
     xlabel('Sample');
     ylabel('Signal');
     title('Input Signal');
+    legend(strMeanX, 'Location', 'northeast');
     grid on;
     
     
@@ -26,6 +35,7 @@ function plot_signal(x, y, n)
     xlabel('Sample');
     ylabel('Signal');
     title('Output signal');
+    legend(strMeanY, 'Location', 'northeast');
     grid on;
 
     sgtitle('Time-domain signals (I/O)', 'Color', 'k', 'FontSize', 14, 'FontWeight', 'bold');
@@ -62,12 +72,11 @@ end
 
 function plot_signal_properties(u, fn, N, sigName)
     U = fftshift(fft(u));
-    periodo = (abs(U).^2) / N;
-    mean_u = mean(u); 
+    periodo = (abs(U).^2) / N; 
     mean_perio = mean(periodo);
     R_uu = xcorr(u, 'biased');
+    lags = -(N-1):(N-1);
 
-    strMean = sprintf('mean(%s) = %.4f', sigName, mean_u);
     strMeanPerio = sprintf('mean(|%s|^2/N) = %.4f', upper(sigName), mean_perio);
 
     figure('Name', sprintf('%s Properties', sigName));
@@ -79,27 +88,27 @@ function plot_signal_properties(u, fn, N, sigName)
     xlim([-0.5 0.5]);
     title(sprintf('Amplitude spectrum of %s', sigName));
     grid on;
-    legend(strMean, 'Location', 'northeast');
-    
+
     subplot(3, 1, 2);
     plot(fn, 10*log10(periodo));
     ylabel(sprintf('|%s(f)|^2 / N  (dB)', upper(sigName)));
     xlabel('Normalized frequency f/f_e');
-    title(sprintf('Power spectral density of %s', sigName));
+    title(sprintf('Power spectral density estimation of %s', sigName));
     xlim([-0.5 0.5]);
     legend(strMeanPerio, 'Location', 'northeast');
     
     subplot(3, 1, 3);
-    plot(R_uu);
+    plot(lags, R_uu);
     ylabel(sprintf('R_{%s %s}', sigName, sigName));
     xlabel('Lag \tau');
-    xlim([1500 2500]);
+    xlim([-500 500]);
     grid on;
     title(sprintf('Autocorrelation of %s', sigName));
     
     sgtitle(sprintf('Statistical properties of %s', sigName), 'Color', 'k', 'FontSize', 14, 'FontWeight', 'bold');
-
 end
+
+
 
 % 2.2.a
 N = 2000;
