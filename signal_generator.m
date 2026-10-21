@@ -108,6 +108,29 @@ function plot_signal_properties(u, fn, N, sigName)
     sgtitle(sprintf('Statistical properties of %s', sigName), 'Color', 'k', 'FontSize', 14, 'FontWeight', 'bold');
 end
 
+% Etape 1
+function y_cum = integrate_signal(x)
+    x_cent = x - mean(x);
+    y_cum = cumtrapz(1:length(x), x_cent);
+end
+
+% Etape 2/a
+function trend = proc_trend_2a(x, N, k)
+    M = length(x);
+    nb_wind = floor(M/N);
+    trend_x = zeros(M);
+    for i = 1 : nb_wind
+        % trend_segm = mean(x((i-1) * N + 1 : i*N));
+        p = polyfit(1:N, x((i-1) * N + 1 : i*N), k);
+        trend_segm = polyval(p, 1:N);
+        
+        trend_x((i-1) * N + 1 : i*N) = trend_segm;
+    end
+    trend = trend_x;
+end
+
+% Etape 2/b
+
 
 
 % 2.2.a
@@ -135,52 +158,64 @@ h = freqz(b, a, 2*pi*fn);
 u = randn(1, N);
 x = filter(b, a, u);
 
-plot_pole_zero_diagram(b, a, fn, h);
-exportgraphics(gcf, './Figures/All_zero_diagram.png', 'BackgroundColor', 'white');
+window_len = 5;
+k = 1;
+y = integrate_signal(x);
+trend_y = proc_trend_2a(y, window_len, k);
 
 
-plot_signal_properties(u, fn, N, 'u');
-exportgraphics(gcf, './Figures/zero_u_prop.png', 'BackgroundColor', 'white');
 
 
-plot_signal_properties(x, fn, N, 'x');
-exportgraphics(gcf, './Figures/zero_x_prop.png', 'BackgroundColor', 'white');
 
 
-plot_signal(u, x, N);
-exportgraphics(gcf, './Figures/All_zero_Inp_Out.png', 'BackgroundColor', 'white');
+% 
+% plot_pole_zero_diagram(b, a, fn, h);
+% exportgraphics(gcf, './Figures/All_zero_diagram.png', 'BackgroundColor', 'white');
+% 
+% 
+% plot_signal_properties(u, fn, N, 'u');
+% exportgraphics(gcf, './Figures/zero_u_prop.png', 'BackgroundColor', 'white');
+% 
+% 
+% plot_signal_properties(x, fn, N, 'x');
+% exportgraphics(gcf, './Figures/zero_x_prop.png', 'BackgroundColor', 'white');
+% 
+% 
+% plot_signal(u, x, N);
+% exportgraphics(gcf, './Figures/All_zero_Inp_Out.png', 'BackgroundColor', 'white');
+% 
+% % 2.2.b
+% N = 2000;
+% R = 0.99;
+% f1_res = 1/3; % Normalized
+% f2_res = 3/7;
+% 
+% omega1 = 2*pi*f1_res;
+% omega2 = 2*pi*f2_res;
+% 
+% p1 = R * exp(1i*omega1);
+% p2 = R * exp(-1i*omega2);
+% 
+% fn = -1/2 : 1/N : 1/2 - 1/N;
+% 
+% b = 1;
+% a = poly([p1 conj(p1) p2 conj(p2)]);
+% 
+% h = freqz(b, a, 2*pi*fn);
+% 
+% u = randn(1, N);
+% x = filter(b, a, u);
+% 
+% plot_pole_zero_diagram(b, a, fn, h);
+% exportgraphics(gcf, './Figures/All_pole_diagram.png', 'BackgroundColor', 'white');
+% 
+% plot_signal_properties(u, fn, N, 'u');
+% exportgraphics(gcf, './Figures/pole_u_prop.png', 'BackgroundColor', 'white');
+% 
+% plot_signal_properties(x, fn, N, 'x');
+% exportgraphics(gcf, './Figures/pole_x_prop.png', 'BackgroundColor', 'white');
+% 
+% plot_signal(u, x, N);
+% exportgraphics(gcf, './Figures/All_pole_Inp_Out.png', 'BackgroundColor', 'white');
 
-% 2.2.b
-N = 2000;
-R = 0.99;
-f1_res = 1/3; % Normalized
-f2_res = 3/7;
-
-omega1 = 2*pi*f1_res;
-omega2 = 2*pi*f2_res;
-
-p1 = R * exp(1i*omega1);
-p2 = R * exp(-1i*omega2);
-
-fn = -1/2 : 1/N : 1/2 - 1/N;
-
-b = 1;
-a = poly([p1 conj(p1) p2 conj(p2)]);
-
-h = freqz(b, a, 2*pi*fn);
-
-u = randn(1, N);
-x = filter(b, a, u);
-
-plot_pole_zero_diagram(b, a, fn, h);
-exportgraphics(gcf, './Figures/All_pole_diagram.png', 'BackgroundColor', 'white');
-
-plot_signal_properties(u, fn, N, 'u');
-exportgraphics(gcf, './Figures/pole_u_prop.png', 'BackgroundColor', 'white');
-
-plot_signal_properties(x, fn, N, 'x');
-exportgraphics(gcf, './Figures/pole_x_prop.png', 'BackgroundColor', 'white');
-
-plot_signal(u, x, N);
-exportgraphics(gcf, './Figures/All_pole_Inp_Out.png', 'BackgroundColor', 'white');
 
