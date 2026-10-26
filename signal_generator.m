@@ -130,7 +130,42 @@ function trend = proc_trend_2a(x, N, k)
 end
 
 % Etape 2/b
+function trend = proc_trend_2b(x, N)
+    M = length(x);
+    nb_wind = floor(M/N);
+    trend_x = zeros(M);
+    for i = 1 : nb_wind
+        z = exp(1j*2*pi(1:N-1)/N);
+        trend_segm = filter(z, 1, x((i-1) * N + 1 : i*N));        
+        trend_x((i-1) * N + 1 : i*N) = trend_segm;
+    end
+    trend = trend_x;
+end
 
+function trend = proc_trend_2c1(x, N)
+    M = length(x);
+    nb_wind = floor(M/N);
+    trend_x = zeros(M);
+    for i = 1 : nb_wind
+        z = exp(1j*2*pi(1:N-1)/N);
+        % We can use filtfilt function or z.^2
+        trend_segm = filter(z.^2, 1, x((i-1) * N + 1 : i*N));        
+        trend_x((i-1) * N + 1 : i*N) = trend_segm;
+    end
+    trend = trend_x;
+end
+
+function trend = proc_trend_2c2(x, N)
+    M = length(x);
+    nb_wind = floor(M/N);
+    trend_x = zeros(M);
+    for i = 1 : nb_wind
+        z = exp(1j*2*pi(1:N-1)/N);
+        trend_segm = filter(2*real(z), 1, x((i-1) * N + 1 : i*N));        
+        trend_x((i-1) * N + 1 : i*N) = trend_segm;
+    end
+    trend = trend_x;
+end
 
 
 % 2.2.a
@@ -161,7 +196,8 @@ x = filter(b, a, u);
 window_len = 5;
 k = 1;
 y = integrate_signal(x);
-trend_y = proc_trend_2a(y, window_len, k);
+% trend_y = proc_trend_2a(y, window_len, k);
+trend_y = proc_trend_2b(y, window_len);
 
 
 
