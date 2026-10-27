@@ -130,7 +130,7 @@ function plot_all_estimates(x, f, DSP, M_D, M, k, L, sigName)
     grid on;
 
     legend('Estimate', 'Theoretical PSD', 'Position', [0.72 0.25 0.15 0.08]); 
-    sgtitle(['PSD estimates of the ', sigName]);
+    sgtitle(['PSD estimates of the ', sigName], 'Color', 'k', 'FontSize', 14, 'FontWeight', 'bold');
 end
 
 
@@ -163,3 +163,4 @@ DSP = sigma2 * abs(h).^2;
 f = fn;                                       
 
 plot_all_estimates(x, f, DSP, 11, 256, 2, 200, 'AR process');
+exportgraphics(gcf, './Figures/DSP_estimations.png', 'BackgroundColor', 'white');

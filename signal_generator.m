@@ -111,19 +111,19 @@ end
 % Etape 1
 function y_cum = integrate_signal(x)
     x_cent = x - mean(x);
-    y_cum = cumtrapz(1:length(x), x_cent);
+    % y_cum = cumtrapz(1:length(x), x_cent); % Which one int. is better ?
+    y_cum = cumsum(x_cent);
 end
 
 % Etape 2/a
 function trend = proc_trend_2a(x, N, k)
     M = length(x);
     nb_wind = floor(M/N);
-    trend_x = zeros(M);
+    trend_x = zeros(M, 1);
     for i = 1 : nb_wind
-        % trend_segm = mean(x((i-1) * N + 1 : i*N));
+        % trend_segm = mean(x((i-1) * N + 1 : i*N)); % k = 0
         p = polyfit(1:N, x((i-1) * N + 1 : i*N), k);
         trend_segm = polyval(p, 1:N);
-        
         trend_x((i-1) * N + 1 : i*N) = trend_segm;
     end
     trend = trend_x;
@@ -133,10 +133,11 @@ end
 function trend = proc_trend_2b(x, N)
     M = length(x);
     nb_wind = floor(M/N);
-    trend_x = zeros(M);
+    trend_x = zeros(M, 1);
     for i = 1 : nb_wind
-        z = exp(1j*2*pi(1:N-1)/N);
-        trend_segm = filter(z, 1, x((i-1) * N + 1 : i*N));        
+        z = exp(1j*2*pi*(1:N-1)/N);
+        b = real(poly(z)) / N;
+        trend_segm = filter(b, 1, x((i-1) * N + 1 : i*N));  
         trend_x((i-1) * N + 1 : i*N) = trend_segm;
     end
     trend = trend_x;
@@ -145,11 +146,12 @@ end
 function trend = proc_trend_2c1(x, N)
     M = length(x);
     nb_wind = floor(M/N);
-    trend_x = zeros(M);
+    trend_x = zeros(M, 1);
+    h = ones(1, N) / N;
+    h_eq = conv(h, fliplr(h)); % Length = 2N-1 ; Shift = N-1
     for i = 1 : nb_wind
-        z = exp(1j*2*pi(1:N-1)/N);
-        % We can use filtfilt function or z.^2
-        trend_segm = filter(z.^2, 1, x((i-1) * N + 1 : i*N));        
+        full = conv(x((i-1) * N + 1 : i*N), h_eq); % Length = 3N-2
+        trend_segm = full(N:2*N-1);        
         trend_x((i-1) * N + 1 : i*N) = trend_segm;
     end
     trend = trend_x;
@@ -158,13 +160,34 @@ end
 function trend = proc_trend_2c2(x, N)
     M = length(x);
     nb_wind = floor(M/N);
-    trend_x = zeros(M);
+    trend_x = zeros(M, 1);
+    h = ones(1, N) / N;
+    h_eq = zeros(1, 2*N-1);
+    h_eq(N:2*N-1) = h;
+    h_eq(1:N)= h_eq(1:N) + fliplr(h);
     for i = 1 : nb_wind
-        z = exp(1j*2*pi(1:N-1)/N);
-        trend_segm = filter(2*real(z), 1, x((i-1) * N + 1 : i*N));        
+        full = conv(x((i-1) * N + 1 : i*N), h_eq);
+        trend_segm = full(N:2*N-1);        
         trend_x((i-1) * N + 1 : i*N) = trend_segm;
     end
     trend = trend_x;
+end
+
+function [N_values, P, coef, slope] = compute_power_proc_r(y)
+    M = length(y);
+    N_values = 3:floor(M/2);
+    P = zeros(size(N_values));
+    
+    for idx = 1:numel(N_values)
+        Ni = N_values(idx);
+        L  = floor(M/Ni);
+        trend = proc_trend_2c2(y, Ni); % Switch to change version of computation of the trend
+        r = y(1:L*Ni) - trend(1:L*Ni);
+        P(idx) = mean(r.^2);
+    end
+    idx_fit = N_values >= 10 & N_values <= floor(M/10); % Avoid extreme values for the fit
+    coef = polyfit(log(N_values(idx_fit)), log(P(idx_fit)), 1);
+    slope = coef(1);
 end
 
 
@@ -190,21 +213,27 @@ a = 1;
 
 h = freqz(b, a, 2*pi*fn);
 
-u = randn(1, N);
+u = randn(N, 1);
 x = filter(b, a, u);
 
-window_len = 5;
-k = 1;
 y = integrate_signal(x);
-% trend_y = proc_trend_2a(y, window_len, k);
-trend_y = proc_trend_2b(y, window_len);
+
+[N_values_y, P_y, coef_y, slope_y] = compute_power_proc_r(y);
+[N_values_x, P_x, coef_x, slope_x] = compute_power_proc_r(x); % without integration step.
+
+figure('Name', "r's Power");
+loglog(N_values_y, P_y, 'x'); hold on;
+loglog(N_values_x, P_x, 'o');
+plot(N_values_y, exp(polyval(coef_y, log(N_values_y))), 'r-', 'LineWidth', 1.5);
+plot(N_values_x, exp(polyval(coef_x, log(N_values_x))), 'b-', 'LineWidth', 1.5);
+xlabel('N'); ylabel('P(N)');
+title(sprintf('Slope with int. = %.3f | Without int. = %.3f', slope_y, slope_x));
+legend('With integration', 'Without integration', 'Fit with', 'Fit without', 'Location', 'best');
+grid on;
+exportgraphics(gcf, './Figures/power_in_func_N.png', 'BackgroundColor', 'white');
 
 
 
-
-
-
-% 
 % plot_pole_zero_diagram(b, a, fn, h);
 % exportgraphics(gcf, './Figures/All_zero_diagram.png', 'BackgroundColor', 'white');
 % 
