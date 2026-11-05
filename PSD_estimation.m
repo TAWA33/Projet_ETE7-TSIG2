@@ -3,7 +3,7 @@ close all ; clear all ; clc;
 function [P, fn] = periodo(x)
     x = x(:);
     N = length(x);
-    Nfft = 2^nextpow2(N);
+    Nfft = 2^nextpow2(N); % Zero padding to have Nfft = 2^alpha
     X = fftshift(fft(x, Nfft));
     P = abs(X).^2 / N;
     fn = -1/2 : 1/Nfft : 1/2 - 1/Nfft;
@@ -20,7 +20,7 @@ function [P_D, fn] = Daniell_periodogram(x, M)
         error('M should be odd.');
     end
     J = (M - 1) / 2;
-    P_D = zeros(1, N - 2 * J); % Pour enlever les valeurs aux extremités qui n'ont pas des valeurs voisines à gauche ou à droite
+    P_D = zeros(1, N - 2 * J); % remove the samples at the extremities that do not have neighboring samples on the left or right
     for i = J + 1 : N - J
         P_D(i - J) = mean(P(i - J: i + J));
     end
@@ -42,13 +42,13 @@ function [P_B, fn] = Bartlett_periodogram(x, M)
         segment = x(i*M - M + 1 : i * M);
         P_segments(i, :) = abs(fftshift(fft(segment))).^2 / M;
     end
-    P_B = mean(P_segments, 1);  % moyenne des L périodogrammes, fréquence par fréquence (selon les colonnes)
+    P_B = mean(P_segments, 1);  % mean of the L periodograms, frequency by frequency
     fn = -1/2 : 1/M : 1/2 - 1/M;
 end
 
 
 function [P_W, fn] = Welch_periodogram(x, M, k)
-    x = x(:); % vecteur colonne, compatible avec hamming() qui retounre un vecteur colonne
+    x = x(:); % to get a column vector, compatible with hamming() that returns a column vector
     N = length(x);
     if (M > N) 
         error('M must be less than or equal to length(x).');
@@ -62,7 +62,7 @@ function [P_W, fn] = Welch_periodogram(x, M, k)
     for i = 1 : L
         segment = x(i*M - (i-1)*(floor(M/k)) - M + 1 : i*M - (i-1)*(floor(M/k)));
         segment = segment.*w;
-        P_segments(i, :) = abs(fftshift(fft(segment))).^2 / sum(w.^2); % On divise par l'énergie de la fenêtre pour normaliser 
+        P_segments(i, :) = abs(fftshift(fft(segment))).^2 / sum(w.^2); % divide by the energy of window for normalization
     end
     P_W = mean(P_segments, 1);
     fn = -1/2 : 1/M : 1/2 - 1/M;
@@ -70,7 +70,7 @@ end
 
 
 function [P_c, fn] = correlogram(x, L)
-    x = x(:); % vecteur colonne, compatible avec hamming() qui retounre un vecteur colonne
+    x = x(:); % to get a column vector, compatible with hamming() that returns a column vector
     N = length(x);
     if (L >= N) 
         error('L must be less than length(x).');
@@ -130,7 +130,7 @@ function plot_all_estimates(x, f, DSP, M_D, M, k, L, sigName)
     grid on;
 
     legend('Estimate', 'Theoretical PSD', 'Position', [0.72 0.25 0.15 0.08]); 
-    sgtitle(['PSD estimates of the ', sigName], 'Color', 'k', 'FontSize', 14, 'FontWeight', 'bold');
+    sgtitle(['PSD estimates of the ', sigName]);
 end
 
 
@@ -163,4 +163,3 @@ DSP = sigma2 * abs(h).^2;
 f = fn;                                       
 
 plot_all_estimates(x, f, DSP, 11, 256, 2, 200, 'AR process');
-exportgraphics(gcf, './Figures/DSP_estimations.png', 'BackgroundColor', 'white');
