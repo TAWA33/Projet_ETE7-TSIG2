@@ -8,7 +8,6 @@ function plot_signal(x, y, n)
     strMeanX = sprintf('mean(x) = %.4f', mean_x);
     strMeanY = sprintf('mean(y) = %.4f', mean_y);
 
-
     figure('Name','I/O Signals');
     subplot(3, 1, 1);
     plot(1:1:n, y, 'LineWidth', 1.2, 'DisplayName', 'Output y[n]');
@@ -108,14 +107,14 @@ function plot_signal_properties(u, fn, N, sigName)
     sgtitle(sprintf('Statistical properties of %s', sigName), 'Color', 'k', 'FontSize', 14, 'FontWeight', 'bold');
 end
 
-% Etape 1
+% Step 1
 function y_cum = integrate_signal(x)
     x_cent = x - mean(x);
     % y_cum = cumtrapz(1:length(x), x_cent); % Which one int. is better ?
     y_cum = cumsum(x_cent);
 end
 
-% Etape 2/a
+% Step 2/a
 function trend = proc_trend_2a(x, N, k)
     M = length(x);
     nb_wind = floor(M/N);
@@ -129,7 +128,7 @@ function trend = proc_trend_2a(x, N, k)
     trend = trend_x;
 end
 
-% Etape 2/b
+% Step 2/b
 function trend = proc_trend_2b(x, N)
     M = length(x);
     nb_wind = floor(M/N);
@@ -151,7 +150,7 @@ function trend = proc_trend_2c1(x, N)
     h_eq = conv(h, fliplr(h)); % Length = 2N-1 ; Shift = N-1
     for i = 1 : nb_wind
         full = conv(x((i-1) * N + 1 : i*N), h_eq); % Length = 3N-2
-        trend_segm = full(N:2*N-1);        
+        trend_segm = full(N:2*N-1);
         trend_x((i-1) * N + 1 : i*N) = trend_segm;
     end
     trend = trend_x;
@@ -173,6 +172,7 @@ function trend = proc_trend_2c2(x, N)
     trend = trend_x;
 end
 
+% Etape 4
 function [N_values, P, coef, slope] = compute_power_proc_r(y)
     M = length(y);
     N_values = 3:floor(M/2);
@@ -183,9 +183,9 @@ function [N_values, P, coef, slope] = compute_power_proc_r(y)
         L  = floor(M/Ni);
         trend = proc_trend_2c2(y, Ni); % Switch to change version of computation of the trend
         r = y(1:L*Ni) - trend(1:L*Ni);
-        P(idx) = mean(r.^2);
+        P(idx) = mean(abs(r).^2);
     end
-    idx_fit = N_values >= 10 & N_values <= floor(M/10); % Avoid extreme values for the fit
+    idx_fit = N_values >= 15 & N_values <= floor(M/10); % Avoid extreme values for the fit
     coef = polyfit(log(N_values(idx_fit)), log(P(idx_fit)), 1);
     slope = coef(1);
 end
@@ -205,11 +205,11 @@ z2 = R * exp(-1i*omega2);
 
 fn = -1/2 : 1/N : 1/2 - 1/N;
 
-%b = [1, -2*real(z1)-2*real(z2), abs(z1)^2 + abs(z2)^2 + 4*real(z1)*real(z2), -2*real(z1)*abs(z2)^2 -2*real(z2)*abs(z1)^2, abs(z1)^2*abs(z2)^2];
-%a = 1;
+% b = poly([z1 conj(z1) z2 conj(z2)]);
+% a = 1;
 
-b = poly([z1 conj(z1) z2 conj(z2)]);
-a = 1;
+b = 1;
+a = poly([z2 conj(z2)]);
 
 h = freqz(b, a, 2*pi*fn);
 
@@ -217,6 +217,7 @@ u = randn(N, 1);
 x = filter(b, a, u);
 
 y = integrate_signal(x);
+
 
 [N_values_y, P_y, coef_y, slope_y] = compute_power_proc_r(y);
 [N_values_x, P_x, coef_x, slope_x] = compute_power_proc_r(x); % without integration step.
