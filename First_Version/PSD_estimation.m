@@ -138,7 +138,7 @@ end
 
 N = 2000;
 R = 0.99;
-f1_res = 1/3; % Normalized
+f1_res = 1/3;
 f2_res = 3/7;
 
 omega1 = 2*pi*f1_res;

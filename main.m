@@ -6,7 +6,7 @@ rng(0); % Seed
 cfg.M = 5000;
 cfg.N_win = 50;
 cfg.trend_fun = @proc_trend_2c2;   % trend method (2a/2b/2c1/2c2)
-cfg.case_id = 'wgn';         % 'wgn' (RIF 4 zéros) ou 'ar2' (RII 4 pôles)
+cfg.case_id = 'wgn';         % 'wgn' (RIF 4 zeros) or 'ar2' (RII 4 poles)
 cfg.fig_dir = './Figures';
 if ~exist(cfg.fig_dir, 'dir')
     mkdir(cfg.fig_dir);
@@ -39,5 +39,3 @@ plot_loglog(Nv_y, P_y, coef_y, Nv_x, P_x, coef_x, slope_y, slope_x, name, cfg.fi
 fprintf('\n=== Feature (%s) ===\n', name);
 fprintf('  with integration    : alpha = %.3f\n', slope_y);
 fprintf('  without integration : alpha = %.3f\n', slope_x);
-
-
