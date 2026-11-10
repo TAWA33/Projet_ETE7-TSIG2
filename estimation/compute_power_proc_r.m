@@ -9,7 +9,7 @@ function [N_values, P, coef, slope] = compute_power_proc_r(y, trend_fun)
         r = y(1:L*Ni) - trend(1:L*Ni);
         P(idx) = mean(r.^2);
     end
-    idx_fit = N_values >= 15 & N_values <= floor(M/10); % Avoid extreme values for the fit
+    idx_fit = N_values >= 3 & N_values <= floor(M/6); % Avoid extreme values for the fit
     coef = polyfit(log(N_values(idx_fit)), log(P(idx_fit)), 1);
     slope = coef(1);
 end

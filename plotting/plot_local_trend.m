@@ -1,6 +1,6 @@
 function plot_local_trend(y, trend, N_win, name, M, fig_dir)
     t0 = 1;
-    t1 = min(20*N_win, length(y)); % We plot only 20 windows
+    t1 = length(y);
     t = (t0:t1)';
     figure('Name', sprintf('Local trend - %s', name));
     plot(t, y(t0:t1), 'DisplayName', 'Integrated signal y[n]');

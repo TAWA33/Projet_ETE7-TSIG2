@@ -3,9 +3,9 @@ addpath(genpath(pwd));
 
 rng(0); % Seed
 
-cfg.M = 5000;
+cfg.M = 2000;
 cfg.N_win = 50;
-cfg.trend_fun = @proc_trend_2c2;   % trend method (2a/2b/2c1/2c2)
+cfg.trend_fun = @proc_trend_2b;   % trend method (2a/2b/2c1/2c2)
 cfg.case_id = 'wgn';         % 'wgn' (RIF 4 zeros) or 'ar2' (RII 4 poles)
 cfg.fig_dir = './Figures';
 if ~exist(cfg.fig_dir, 'dir')
@@ -33,6 +33,7 @@ plot_local_trend(y, trend_visu, cfg.N_win, name, cfg.M, cfg.fig_dir);
 
 [Nv_y, P_y, coef_y, slope_y] = compute_power_proc_r(y, cfg.trend_fun);
 [Nv_x, P_x, coef_x, slope_x] = compute_power_proc_r(x, cfg.trend_fun); % without integration step.
+
 
 plot_loglog(Nv_y, P_y, coef_y, Nv_x, P_x, coef_x, slope_y, slope_x, name, cfg.fig_dir);
 
