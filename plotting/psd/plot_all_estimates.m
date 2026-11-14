@@ -14,9 +14,10 @@ function plot_all_estimates(x, fn_theo, DSP, params, sigName, tag, fig_dir)
     hold on;
     plot(fn_theo, DSP_dB);
     hold off;
-    title('Periodogram'); 
-    xlabel('Normalized frequency'); 
-    ylabel('PSD (dB)'); 
+    title('Periodogram', 'FontSize', 18); 
+    xlabel('Normalized frequency', 'FontSize', 16); 
+    ylabel('PSD (dB)', 'FontSize', 16); 
+    set(gca, 'FontSize', 16);
     grid on;
 
     subplot(2,3,2);
@@ -24,9 +25,10 @@ function plot_all_estimates(x, fn_theo, DSP, params, sigName, tag, fig_dir)
     hold on;
     plot(fn_theo, DSP_dB);
     hold off;
-    title(sprintf('Daniell, M = %d', params.M_D));
-    xlabel('Normalized frequency');
-    ylabel('PSD (dB)');
+    title(sprintf('Daniell, M = %d', params.M_D), 'FontSize', 18);
+    xlabel('Normalized frequency', 'FontSize', 16);
+    ylabel('PSD (dB)', 'FontSize', 16);
+    set(gca, 'FontSize', 16);
     grid on;
 
     subplot(2,3,3);
@@ -34,9 +36,10 @@ function plot_all_estimates(x, fn_theo, DSP, params, sigName, tag, fig_dir)
     hold on;
     plot(fn_theo, DSP_dB);
     hold off;
-    title(sprintf('Bartlett, M = %d', params.M_BW));
-    xlabel('Normalized frequency'); 
-    ylabel('PSD (dB)'); 
+    title(sprintf('Bartlett, M = %d', params.M_BW), 'FontSize', 18);
+    xlabel('Normalized frequency', 'FontSize', 16); 
+    ylabel('PSD (dB)', 'FontSize', 16); 
+    set(gca, 'FontSize', 16);
     grid on;
 
     subplot(2,3,4);
@@ -44,9 +47,10 @@ function plot_all_estimates(x, fn_theo, DSP, params, sigName, tag, fig_dir)
     hold on;
     plot(fn_theo, DSP_dB);
     hold off;
-    title(sprintf('Welch, M = %d, k = %g', params.M_BW, params.k_W));
-    xlabel('Normalized frequency');
-    ylabel('PSD (dB)');
+    title(sprintf('Welch, M = %d, k = %g', params.M_BW, params.k_W), 'FontSize', 18);
+    xlabel('Normalized frequency', 'FontSize', 16);
+    ylabel('PSD (dB)', 'FontSize', 16);
+    set(gca, 'FontSize', 16);
     grid on;
 
     subplot(2,3,5);
@@ -54,14 +58,15 @@ function plot_all_estimates(x, fn_theo, DSP, params, sigName, tag, fig_dir)
     hold on;
     plot(fn_theo, DSP_dB);
     hold off;
-    title(sprintf('Correlogram, L = %d', params.L_corr));
-    xlabel('Normalized frequency');
-    ylabel('PSD (dB)');
+    title(sprintf('Correlogram, L = %d', params.L_corr), 'FontSize', 18);
+    xlabel('Normalized frequency', 'FontSize', 16);
+    ylabel('PSD (dB)', 'FontSize', 16);
+    set(gca, 'FontSize', 16);
     grid on;
 
-    legend({'Estimate', 'Theoretical PSD'}, 'Location', 'south', 'FontSize', 11, 'Position', [0.72 0.25 0.15 0.08]);
+    legend({'Estimate', 'Theoretical PSD'}, 'Location', 'south', 'FontSize', 13, 'Position', [0.72 0.25 0.15 0.08]);
 
-    sgtitle(sprintf('PSD estimates of the %s', sigName), 'FontSize', 13);
+    sgtitle(sprintf('PSD estimates of the %s', sigName), 'Color', 'k', 'FontSize', 20);
 
-    exportgraphics(gcf, fullfile(fig_dir, sprintf('DSP_est_%s.png', tag)), 'BackgroundColor', 'white');
+    exportgraphics(gcf, fullfile(fig_dir, sprintf('DSP_estimations_%s.png', tag)), 'BackgroundColor', 'white', 'Resolution', 300);
 end
