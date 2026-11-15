@@ -1,147 +1,147 @@
 function tsig2_gui
-
-addpath(genpath(pwd));
-
-BLACK = [0 0 0];
-
-% ================= Figure =================
-fig = uifigure('Name','TSIG2 — Marker Extraction', 'Position',[60 60 1320 800], 'Color',[1 1 1]);
-try, fig.Theme = 'light'; catch, end   % force thème clair si dispo
-
-gl = uigridlayout(fig,[1 2]);
-gl.ColumnWidth  = {350,'1x'};
-gl.Padding      = [10 10 10 10];
-gl.ColumnSpacing = 10;
-
-% ================= Left Pannel =================
-pLeft = uipanel(gl,'Title','Parametres','FontWeight','bold');
-gL = uigridlayout(pLeft,[4 1]);
-gL.RowHeight    = {'fit','fit','fit','fit'};
-gL.Padding      = [2 2 2 2];
-gL.RowSpacing   = 6;
-
-% ----- Signal -----
-pSig = uipanel(gL,'Title','Signal');
-gS = uigridlayout(pSig,[3 2]);
-gS.RowHeight    = repmat({26},1,3);
-gS.ColumnWidth  = {'fit','1x'};
-gS.Padding      = [6 6 6 6];
-gS.RowSpacing   = 4;
-
-uilabel(gS,'Text','Type');
-ddCase = uidropdown(gS, 'Items',{'White Noise','AR(2)','RIF 4 zeros','RII 4 poles'}, 'ItemsData',{'wgn','ar2','rif','rii'});
-
-uilabel(gS,'Text','Samples M');
-edM = uieditfield(gS,'numeric','Value',2000, 'Limits',[500 1e5],'RoundFractionalValues','on');
-
-uilabel(gS,'Text','Seed');
-edSeed = uieditfield(gS,'numeric','Value',0, 'RoundFractionalValues','on');
-
-% ----- Trend -----
-pT = uipanel(gL,'Title','Trend');
-gT = uigridlayout(pT,[6 2]);
-gT.RowHeight    = {26,26,26,26,26,32};
-gT.ColumnWidth  = {'fit','1x'};
-gT.Padding      = [6 6 6 6];
-gT.RowSpacing   = 4;
-
-uilabel(gT,'Text','Method');
-ddTr = uidropdown(gT, ...
-    'Items',{'2a - mean','2a - polynomial','2b - mean RIF', '2c - Zero-Phase Filter 1','2c - Zero-Phase Filter 2'}, 'ItemsData',{'2a0','2ak','2b','2c1','2c2'}, 'Value','2c2','ValueChangedFcn',@(~,~) update_trend_enable());
-
-uilabel(gT,'Text','Degree k');
-edK = uieditfield(gT,'numeric','Value',1, 'Limits',[1 5],'RoundFractionalValues','on');
-
-uilabel(gT,'Text','Window N');
-edN = uieditfield(gT,'numeric','Value',50, 'Limits',[3 1e5],'RoundFractionalValues','on');
-
-uilabel(gT,'Text','Integration step');
-cbInt = uicheckbox(gT,'Text','activated','Value',true, 'ValueChangedFcn',@(~,~) update_compare_enable());
-
-uilabel(gT,'Text','Compare');
-cbCmp = uicheckbox(gT,'Text','without integration','Value',true);
-
-b1 = uibutton(gT,'Text','Compute Marker','FontWeight','bold', 'ButtonPushedFcn',@(~,~) run_marker());
-b1.Layout.Row = 6; b1.Layout.Column = [1 2];
-
-% ----- PSD -----
-pP = uipanel(gL,'Title','PSD');
-gP = uigridlayout(pP,[6 2]);
-gP.RowHeight    = {26,26,26,26,26,32};
-gP.ColumnWidth  = {'fit','1x'};
-gP.Padding      = [6 6 6 6];
-gP.RowSpacing   = 4;
-
-uilabel(gP,'Text','Estimateur');
-ddPsd = uidropdown(gP, ...
-    'Items',{'Périodogram','Daniell','Bartlett','Welch','Correlogram'}, ...
-    'ItemsData',{'periodo','daniell','bartlett','welch','correlo'}, ...
-    'Value','welch','ValueChangedFcn',@(~,~) update_psd_enable());
-
-uilabel(gP,'Text','M Daniell');
-edMd = uieditfield(gP,'numeric','Value',11, 'Limits',[3 99],'RoundFractionalValues','on');
-
-uilabel(gP,'Text','Window (M)');
-edMbw = uieditfield(gP,'numeric','Value',256, 'Limits',[8 1e5],'RoundFractionalValues','on');
-
-uilabel(gP,'Text','Overlap k');
-edKw = uieditfield(gP,'numeric','Value',2, 'Limits',[2 20],'RoundFractionalValues','on');
-
-uilabel(gP,'Text','Gap L max');
-edLc = uieditfield(gP,'numeric','Value',200, 'Limits',[1 1e5],'RoundFractionalValues','on');
-
-b2 = uibutton(gP,'Text','Compute PSD est.','FontWeight','bold', 'ButtonPushedFcn',@(~,~) run_psd());
-b2.Layout.Row = 6; b2.Layout.Column = [1 2];
-
-% ----- Actions -----
-pA = uipanel(gL,'Title','Comparison');
-gA = uigridlayout(pA,[1 1]);
-gA.RowHeight = {'fit'};
-gA.Padding   = [6 6 6 6];
-
-b3 = uibutton(gA,'Text','Slope vs Nb Samples  (500 → 5000)', 'ButtonPushedFcn',@(~,~) run_slope_vs_M());
-
-tg = uitabgroup(gl);
-
-
-t1 = uitab(tg,'Title','Marker');
-g1 = uigridlayout(t1,[3 1]);
-g1.RowHeight    = {'fit',130,'1x'};
-g1.Padding      = [8 8 8 8];
-g1.RowSpacing   = 6;
-
-lblResult = uilabel(g1, 'Text','Waiting — Press to Compute', 'FontSize',14,'FontWeight','bold', 'FontColor',BLACK, 'HorizontalAlignment','center', 'BackgroundColor',[0.93 0.93 0.85], 'WordWrap','on');
-
-g1b = uigridlayout(g1,[1 2]);
-g1b.Layout.Row     = 2;
-g1b.RowHeight      = {'1x'};
-g1b.ColumnWidth    = {'1x','1x'};
-g1b.Padding        = [0 0 0 0];
-g1b.ColumnSpacing  = 6;
-ax1 = uiaxes(g1b);
-ax2 = uiaxes(g1b);
-
-ax3 = uiaxes(g1);
-ax3.Layout.Row = 3;
-
-% --- PSD ---
-t2 = uitab(tg,'Title','PSD');
-ax4 = uiaxes(uigridlayout(t2,[1 1]));
-
-% --- Slope vs Nb Samples ---
-t3 = uitab(tg,'Title','Slope vs Samples');
-ax5 = uiaxes(uigridlayout(t3,[1 1]));
-
-axesList = [ax1 ax2 ax3 ax4 ax5];
-for ax = axesList
-    style_axes(ax);
-end
-
-update_trend_enable();
-update_compare_enable();
-update_psd_enable();
-
-% ================= Enable / Disable =================
+    
+    addpath(genpath(pwd));
+    
+    BLACK = [0 0 0];
+    
+    % ================= Figure =================
+    fig = uifigure('Name','TSIG2 — Marker Extraction', 'Position',[60 60 1320 800], 'Color',[1 1 1]);
+    try, fig.Theme = 'light'; catch, end   % force thème clair si dispo
+    
+    gl = uigridlayout(fig,[1 2]);
+    gl.ColumnWidth  = {350,'1x'};
+    gl.Padding      = [10 10 10 10];
+    gl.ColumnSpacing = 10;
+    
+    % ================= Left Pannel =================
+    pLeft = uipanel(gl,'Title','Parametres','FontWeight','bold');
+    gL = uigridlayout(pLeft,[4 1]);
+    gL.RowHeight    = {'fit','fit','fit','fit'};
+    gL.Padding      = [2 2 2 2];
+    gL.RowSpacing   = 6;
+    
+    % ----- Signal -----
+    pSig = uipanel(gL,'Title','Signal');
+    gS = uigridlayout(pSig,[3 2]);
+    gS.RowHeight    = repmat({26},1,3);
+    gS.ColumnWidth  = {'fit','1x'};
+    gS.Padding      = [6 6 6 6];
+    gS.RowSpacing   = 4;
+    
+    uilabel(gS,'Text','Type');
+    ddCase = uidropdown(gS, 'Items',{'White Noise','AR(2)','RIF 4 zeros','RII 4 poles'}, 'ItemsData',{'wgn','ar2','rif','rii'});
+    
+    uilabel(gS,'Text','Samples M');
+    edM = uieditfield(gS,'numeric','Value',2000, 'Limits',[500 1e5],'RoundFractionalValues','on');
+    
+    uilabel(gS,'Text','Seed');
+    edSeed = uieditfield(gS,'numeric','Value',0, 'RoundFractionalValues','on');
+    
+    % ----- Trend -----
+    pT = uipanel(gL,'Title','Trend');
+    gT = uigridlayout(pT,[6 2]);
+    gT.RowHeight    = {26,26,26,26,26,32};
+    gT.ColumnWidth  = {'fit','1x'};
+    gT.Padding      = [6 6 6 6];
+    gT.RowSpacing   = 4;
+    
+    uilabel(gT,'Text','Method');
+    ddTr = uidropdown(gT, ...
+        'Items',{'2a - mean','2a - polynomial','2b - mean RIF', '2c - Zero-Phase Filter 1','2c - Zero-Phase Filter 2'}, 'ItemsData',{'2a0','2ak','2b','2c1','2c2'}, 'Value','2c2','ValueChangedFcn',@(~,~) update_trend_enable());
+    
+    uilabel(gT,'Text','Degree k');
+    edK = uieditfield(gT,'numeric','Value',1, 'Limits',[1 5],'RoundFractionalValues','on');
+    
+    uilabel(gT,'Text','Window N');
+    edN = uieditfield(gT,'numeric','Value',50, 'Limits',[3 1e5],'RoundFractionalValues','on');
+    
+    uilabel(gT,'Text','Integration step');
+    cbInt = uicheckbox(gT,'Text','activated','Value',true, 'ValueChangedFcn',@(~,~) update_compare_enable());
+    
+    uilabel(gT,'Text','Compare');
+    cbCmp = uicheckbox(gT,'Text','without integration','Value',true);
+    
+    b1 = uibutton(gT,'Text','Compute Marker','FontWeight','bold', 'ButtonPushedFcn',@(~,~) run_marker());
+    b1.Layout.Row = 6; b1.Layout.Column = [1 2];
+    
+    % ----- PSD -----
+    pP = uipanel(gL,'Title','PSD');
+    gP = uigridlayout(pP,[6 2]);
+    gP.RowHeight    = {26,26,26,26,26,32};
+    gP.ColumnWidth  = {'fit','1x'};
+    gP.Padding      = [6 6 6 6];
+    gP.RowSpacing   = 4;
+    
+    uilabel(gP,'Text','Estimateur');
+    ddPsd = uidropdown(gP, ...
+        'Items',{'Périodogram','Daniell','Bartlett','Welch','Correlogram'}, ...
+        'ItemsData',{'periodo','daniell','bartlett','welch','correlo'}, ...
+        'Value','welch','ValueChangedFcn',@(~,~) update_psd_enable());
+    
+    uilabel(gP,'Text','M Daniell');
+    edMd = uieditfield(gP,'numeric','Value',11, 'Limits',[3 99],'RoundFractionalValues','on');
+    
+    uilabel(gP,'Text','Window (M)');
+    edMbw = uieditfield(gP,'numeric','Value',256, 'Limits',[8 1e5],'RoundFractionalValues','on');
+    
+    uilabel(gP,'Text','Overlap k');
+    edKw = uieditfield(gP,'numeric','Value',2, 'Limits',[2 20],'RoundFractionalValues','on');
+    
+    uilabel(gP,'Text','Gap L max');
+    edLc = uieditfield(gP,'numeric','Value',200, 'Limits',[1 1e5],'RoundFractionalValues','on');
+    
+    b2 = uibutton(gP,'Text','Compute PSD est.','FontWeight','bold', 'ButtonPushedFcn',@(~,~) run_psd());
+    b2.Layout.Row = 6; b2.Layout.Column = [1 2];
+    
+    % ----- Actions -----
+    pA = uipanel(gL,'Title','Comparison');
+    gA = uigridlayout(pA,[1 1]);
+    gA.RowHeight = {'fit'};
+    gA.Padding   = [6 6 6 6];
+    
+    b3 = uibutton(gA,'Text','Slope vs Nb Samples  (500 → 10000)', 'FontWeight','bold', 'ButtonPushedFcn',@(~,~) run_slope_vs_M());
+    
+    tg = uitabgroup(gl);
+    
+    
+    t1 = uitab(tg,'Title','Marker');
+    g1 = uigridlayout(t1,[3 1]);
+    g1.RowHeight    = {'fit',130,'1x'};
+    g1.Padding      = [8 8 8 8];
+    g1.RowSpacing   = 6;
+    
+    lblResult = uilabel(g1, 'Text','Waiting — Press to Compute', 'FontSize',14,'FontWeight','bold', 'FontColor',BLACK, 'HorizontalAlignment','center', 'BackgroundColor',[0.93 0.93 0.85], 'WordWrap','on');
+    
+    g1b = uigridlayout(g1,[1 2]);
+    g1b.Layout.Row     = 2;
+    g1b.RowHeight      = {'1x'};
+    g1b.ColumnWidth    = {'1x','1x'};
+    g1b.Padding        = [0 0 0 0];
+    g1b.ColumnSpacing  = 6;
+    ax1 = uiaxes(g1b);
+    ax2 = uiaxes(g1b);
+    
+    ax3 = uiaxes(g1);
+    ax3.Layout.Row = 3;
+    
+    % --- PSD ---
+    t2 = uitab(tg,'Title','PSD');
+    ax4 = uiaxes(uigridlayout(t2,[1 1]));
+    
+    % --- Slope vs Nb Samples ---
+    t3 = uitab(tg,'Title','Slope vs Samples');
+    ax5 = uiaxes(uigridlayout(t3,[1 1]));
+    
+    axesList = [ax1 ax2 ax3 ax4 ax5];
+    for ax = axesList
+        style_axes(ax);
+    end
+    
+    update_trend_enable();
+    update_compare_enable();
+    update_psd_enable();
+    
+    % ================= Enable / Disable =================
     function update_trend_enable()
         edK.Enable = strcmp(ddTr.Value,'2ak');
     end
@@ -182,8 +182,8 @@ update_psd_enable();
             cla(ax2);
             Nw = max(3, min(edN.Value, floor(M/2)));
             tr = f(y, Nw);
-            t  = 1:min(20*Nw, M);
-            plot(ax2, t, y(t), 'b-', 'LineWidth', 1.0); hold(ax2,'on');
+            t  = 1:M;
+            plot(ax2, t, y(t), 'LineWidth', 1.0); hold(ax2,'on');
             plot(ax2, t, tr(t), 'r-', 'LineWidth', 1.6); hold(ax2,'off');
             title(ax2, sprintf('y(n) and local trend — N = %d', Nw));
             xlabel(ax2,'n'); ylabel(ax2,'amplitude');
@@ -242,7 +242,10 @@ update_psd_enable();
                     [P, fn] = periodo(x); estName = 'Periodogram';
                 case 'daniell'
                     M_D = edMd.Value;
-                    if mod(M_D,2)==0, M_D = M_D+1; end
+                    if mod(M_D,2)==0
+                        M_D = M_D+1;
+                        warning('Daniell : M_D corrected by %d (odd required).', M_D);                   
+                    end
                     if M_D >= M
                         error('Daniell : M_D must be < M.');
                     end
@@ -273,7 +276,7 @@ update_psd_enable();
     end
 
     function run_slope_vs_M()
-        Ms = [500 1000 2000 3000 5000];
+        Ms = [500 1000 1500 2000 2500 3000 3500 4000 5000 8000 10000];
         s  = zeros(size(Ms));
         d  = uiprogressdlg(fig,'Title','Slope vs Samples', 'Message','Launching...','Value',0);
         try
@@ -287,7 +290,7 @@ update_psd_enable();
             cla(ax5);
             plot(ax5, Ms, s, 'o-', 'LineWidth', 1.8, 'MarkerSize', 8, 'MarkerFaceColor','b','MarkerEdgeColor','b');
             xlabel(ax5,'M (samples)'); ylabel(ax5,'Estimated slope');
-            title(ax5, sprintf('%s — slope vs M', name));
+            title(ax5, sprintf('%s — slope vs M (method %s)', name, ddTr.Value));
             style_axes(ax5);
             tg.SelectedTab = t3;
         catch err
