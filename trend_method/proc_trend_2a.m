@@ -1,4 +1,14 @@
 function trend = proc_trend_2a(x, N, k)
+    % Estimates the local trend of x: x is cut into windows of
+    % N samples, and in each window the trend is a polynomial fit of
+    % degree k
+    % Inputs:
+    %   x: input signal
+    %   N: window size
+    %   k: degree of the polynomial (1 by default)
+    % Output:
+    %   trend: local trend of x (same length as x)
+
     if nargin < 3
         k = 1;
     end
