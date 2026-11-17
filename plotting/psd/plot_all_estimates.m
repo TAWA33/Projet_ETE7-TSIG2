@@ -1,4 +1,16 @@
 function plot_all_estimates(x, fn_theo, DSP, params, sigName, tag, fig_dir)
+    % Plots the 5 PSD estimates of x (periodogram, Daniell, Bartlett,
+    % Welch, correlogram), each one compared to the theoretical PSD
+    % Inputs:
+    %   x: input signal
+    %   fn_theo: normalized frequencies of the theoretical PSD
+    %   DSP: theoretical PSD
+    %   params: struct with the estimator parameters (M_D, M_BW, k_W, L_corr)
+    %   sigName: signal name (used in the titles)
+    %   tag: short name (used in the file name)
+    %   fig_dir: folder where the figure is saved
+    % No output
+   
     [P,   fn] = periodo(x);
     [P_D, fn_D] = Daniell_periodogram(x, params.M_D);
     [P_B, fn_B] = Bartlett_periodogram(x, params.M_BW);

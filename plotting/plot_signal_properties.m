@@ -1,4 +1,14 @@
 function plot_signal_properties(u, fn, N, sigName)
+    % Plots the amplitude spectrum, the periodogram (PSD estimate) and the 
+    % biased autocorrelation of the signal
+    % Inputs:
+    %   u: input signal
+    %   fn: normalized frequencies (same length as u)
+    %   N: number of samples of u
+    %   sigName: signal name, a short letter like 'u' or 'x'
+    %            (used in the labels and titles)
+    % No output
+    
     U = fftshift(fft(u));
     periodo = (abs(U).^2) / N; 
     mean_perio = mean(periodo);

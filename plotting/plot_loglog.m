@@ -1,4 +1,16 @@
 function plot_loglog(Nv_y, P_y, coef_y, Nv_x, P_x, coef_x, slope_y, slope_x, name, fig_dir)
+    % Plots P(N) in log-log with and without the integration step, with
+    % their linear fits
+    % Inputs:
+    %   Nv_y, P_y, coef_y: window sizes N, power P(N) and fit coefficients
+    %   (with integration, signal y)
+    %   Nv_x, P_x, coef_x: same thing without integration (signal x)
+    %   slope_y: slope of the fit with integration
+    %   slope_x: slope of the fit without integration
+    %   name: signal name (used in the file name)
+    %   fig_dir: folder where the figure is saved
+    % No output
+
     figure('Name', "r's Power");
     loglog(Nv_y, P_y, 'x'); hold on;
     loglog(Nv_x, P_x, 'o');

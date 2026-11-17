@@ -1,4 +1,14 @@
 function plot_local_trend(y, trend, N_win, name, M, fig_dir)
+    % Plots the integrated signal y with its local trend on the same figure
+    % Inputs:
+    %   y: integrated signal
+    %   trend: local trend of y
+    %   N_win: window size N used for the trend
+    %   name: signal name (used in the title and the file name)
+    %   M: number of samples (shown in the title)
+    %   fig_dir: folder where the figure is saved
+    % No output
+
     t0 = 1;
     t1 = length(y);
     t = (t0:t1)';

@@ -1,5 +1,12 @@
 function plot_signal(x, y, n)
-
+    % Plots the input and output signals of the filter, together and
+    % separately, with their mean shown in the legend
+    % Inputs:
+    %   x: input signal
+    %   y: output signal
+    %   n: number of samples
+    % No output
+    
     mean_x = mean(x);
     mean_y = mean(y);
 

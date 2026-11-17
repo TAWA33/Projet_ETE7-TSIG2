@@ -1,4 +1,13 @@
 function plot_pole_zero_diagram(b, a, fn, h)
+    % Plots the pole-zero diagram of the filter, and the magnitude and
+    % phase of its frequency response
+    % Inputs:
+    %   b: numerator coefficients of the filter
+    %   a: denominator coefficients of the filter
+    %   fn: normalized frequencies
+    %   h: frequency response of the filter at fn
+    % No output
+
     figure('Name','Pôle/Zero + Transf Func');
     title('Pole/Zero diagram + Transfert function');
     
