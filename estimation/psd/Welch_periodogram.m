@@ -1,4 +1,15 @@
 function [P_W, fn] = Welch_periodogram(x, M, k)
+    % Estimates the PSD with the Welch method: x is cut into L overlapping
+    % segments of length M, each one is windowed by a Hamming window, and
+    % the L periodograms are averaged
+    % Inputs:
+    %   x: input signal
+    %   M: length of each segment
+    %   k: 1/k is the overlap rate between 2 consecutive segments
+    % Outputs:
+    %   P_W: Welch PSD estimate
+    %   fn: normalized frequencies (from -1/2 to 1/2)
+
     x = x(:); % to get a column vector, compatible with hamming() that returns a column vector
     N = length(x);
     if (M > N) 

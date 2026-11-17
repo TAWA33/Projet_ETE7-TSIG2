@@ -1,4 +1,15 @@
 function [N_values, P, coef, slope] = compute_power_proc_r(y, trend_fun)
+    % Computes the power P(N) of r = y - trend for each window size N
+    % (from 3 to M/2), then fits a line to log(P) vs log(N);
+    % Inputs:
+    %   y: integrated signal
+    %   trend_fun: the method that is used to calculate the trend
+    % Outputs:
+    %   N_values: window sizes N used
+    %   P: power of r for each N
+    %   coef: coefficients of the log-log fit [slope, intercept]
+    %   slope: slope of the fit (the marker)
+
     M = length(y);
     N_values = 3:floor(M/2);
     P = zeros(size(N_values));

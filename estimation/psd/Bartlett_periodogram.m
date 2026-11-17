@@ -1,4 +1,13 @@
 function [P_B, fn] = Bartlett_periodogram(x, M)
+    % Estimates the PSD with the Bartlett method: x is cut into L
+    % segments of length M (no overlap), and the L periodograms are averaged
+    % Inputs:
+    %   x: input signal
+    %   M: length of each segment
+    % Outputs:
+    %   P_B: Bartlett PSD estimate
+    %   fn: normalized frequencies (from -1/2 to 1/2)
+    
     x = x(:);
     N = length(x);   
     if (M > N) 

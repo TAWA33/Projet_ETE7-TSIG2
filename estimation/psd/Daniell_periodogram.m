@@ -1,4 +1,14 @@
 function [P_D, fn] = Daniell_periodogram(x, M)
+    % Estimates the PSD with the Daniell method: the periodogram of x is
+    % smoothed by a moving average over M neighboring frequencies
+    %
+    % Inputs:
+    %   x: input signal
+    %   M: number of frequencies averaged (must be odd)
+    % Outputs:
+    %   P_D: Daniell PSD estimate
+    %   fn: normalized frequencies
+    
     x = x(:);
     N = length(x);
     X = fftshift(fft(x));
