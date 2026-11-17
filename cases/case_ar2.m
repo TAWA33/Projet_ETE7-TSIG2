@@ -1,4 +1,14 @@
 function [u, x, info] = case_ar2(M)
+    % Generates an AR(2) process: gaussian noise filtered by an all-pole filter
+    % with one pair of conjugate poles
+    % Input:
+    %   M: number of samples
+    % Outputs:
+    %   u: gaussian noise column vector (input of the filter)
+    %   x: filtered output
+    %   info: struct with the filter coefficients (b, a), the normalized
+    %         frequencies fn and the frequency response h (GUI interface)
+ 
     R = 0.95;
     fpole = 4/9; 
     p1 = R * exp(1i*2*pi*fpole);

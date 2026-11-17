@@ -1,4 +1,15 @@
 function [u, x, info] = case_rii_poles(M)
+    % Generates an AR(4) process: gaussian noise filtered by an all-pole
+    % IIR filter with 2 pairs of conjugate poles
+    % Input:
+    %   M: number of samples
+    % Outputs:
+    %   u: gaussian noise column vector (input of the filter)
+    %   x: filtered output
+    %   info: struct with the filter coefficients (b, a), the normalized
+    %         frequencies fn, the frequency response h, the case name and a
+    %         short tag (GUI interface)
+
     R  = 0.99;
     f1 = 1/3;  f2 = 3/7;
     p1 = R * exp(1i*2*pi*f1);
