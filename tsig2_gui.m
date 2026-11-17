@@ -1,5 +1,11 @@
 function tsig2_gui
-    
+    % Graphical interface of the project: choose the signal, the trend
+    % method and the PSD estimator, then compute and plot the marker
+    % (log-log slope), the PSD estimate vs the theoretical PSD, and the
+    % slope vs the number of samples M
+    % No input
+    % No output
+
     addpath(genpath(pwd));
     
     BLACK = [0 0 0];
